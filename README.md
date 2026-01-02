@@ -5,11 +5,11 @@ A lightweight Neovim plugin that displays a navigable Table of Contents for Mark
 ## Features
 
 - 📝 **Auto-generated TOC**: Parses Markdown headers (`#`, `##`, etc.) automatically.
-- 🪟 **Floating Window**: Displays the TOC in a centered floating window.
+- 🪟 **Floating Window**: Displays the TOC in a centered floating window with rounded borders.
 - 🚀 **Fast Navigation**: Jump instantly to any header.
 - 🧠 **Smart Parsing**: Ignores comments inside code blocks.
 - 🎨 **NVChad Friendly**: Uses standard highlights and borders to match your theme.
-- 🧩 **Plenary Integration**: leverages `plenary.nvim` for window management (with native fallback).
+- 🔧 **Zero Dependencies**: Uses only Neovim built-in APIs.
 
 ## Installation
 
@@ -18,7 +18,6 @@ Install with [lazy.nvim](https://github.com/folke/lazy.nvim):
 ```lua
 {
   "JoshuaFurman/atlas.nvim",
-  dependencies = { "nvim-lua/plenary.nvim" },
   cmd = { "Atlas" },
   config = function()
     require("atlas").setup({})
@@ -31,7 +30,6 @@ If you are developing this locally, you can point to the local directory:
 ```lua
 {
   dir = "/path/to/atlas",
-  dependencies = { "nvim-lua/plenary.nvim" },
   cmd = { "Atlas" },
   config = function()
     require("atlas").setup()

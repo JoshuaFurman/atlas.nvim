@@ -1,5 +1,4 @@
 local M = {}
-local has_plenary, float = pcall(require, "plenary.window.float")
 
 ---@class AtlasEntry
 ---@field line integer
@@ -24,35 +23,28 @@ function M.show(entries, source_win)
 		mapping[i] = entry.line
 	end
 
-	local win_id
-	local buf
+	-- Create buffer
+	local buf = vim.api.nvim_create_buf(false, true)
 
-	if has_plenary then
-		local res = float.percentage_range_window(0.5, 0.6, {}, {
-			title = " Atlas ",
-			border = "rounded",
-		})
-		win_id = res.win_id
-		buf = res.bufnr
-	else
-		-- Simple fallback if plenary is missing
-		buf = vim.api.nvim_create_buf(false, true)
-		local width = math.floor(vim.o.columns * 0.6)
-		local height = math.min(#lines, 20)
-		local row = math.floor((vim.o.lines - height) / 2)
-		local col = math.floor((vim.o.columns - width) / 2)
+	-- Calculate dimensions (60% width, adaptive height)
+	local width = math.floor(vim.o.columns * 0.6)
+	local height = math.min(#lines + 2, math.floor(vim.o.lines * 0.8))
+	local row = math.floor((vim.o.lines - height) / 2)
+	local col = math.floor((vim.o.columns - width) / 2)
 
-		local opts = {
-			relative = "editor",
-			width = width,
-			height = height,
-			row = row,
-			col = col,
-			style = "minimal",
-			border = "rounded",
-		}
-		win_id = vim.api.nvim_open_win(buf, true, opts)
-	end
+	-- Create floating window with border and title
+	local opts = {
+		relative = "editor",
+		width = width,
+		height = height,
+		row = row,
+		col = col,
+		style = "minimal",
+		border = "rounded",
+		title = " Atlas ",
+		title_pos = "center",
+	}
+	local win_id = vim.api.nvim_open_win(buf, true, opts)
 
 	-- Populate the buffer
 	vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
