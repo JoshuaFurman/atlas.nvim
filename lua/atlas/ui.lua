@@ -17,9 +17,71 @@ function M.show(entries, source_win)
 	local lines = {}
 	local mapping = {}
 
+	-- Tree-drawing characters
+	local branch = "├── "
+	local last_branch = "└── "
+	local vertical = "│   "
+	local blank = "    "
+
+	--- Check if entry at index `idx` is the last sibling at its level.
+	--- Scans forward: returns true if no subsequent entry shares the same
+	--- level before we leave the parent scope (an entry at level <= level-1).
+	---@param idx integer
+	---@return boolean
+	local function is_last_sibling(idx)
+		local lvl = entries[idx].level
+		for j = idx + 1, #entries do
+			if entries[j].level == lvl then
+				return false -- found another sibling
+			end
+			if entries[j].level < lvl then
+				return true -- left parent scope, no more siblings
+			end
+		end
+		return true -- reached end of list
+	end
+
+	--- For a given entry at index `idx`, determine whether an ancestor at
+	--- depth `depth` still has remaining siblings below. This controls
+	--- whether we draw "│   " (continuation) or "    " (blank) at that
+	--- depth column.
+	---@param idx integer
+	---@param depth integer
+	---@return boolean
+	local function ancestor_has_more(idx, depth)
+		for j = idx + 1, #entries do
+			if entries[j].level == depth then
+				return true -- found a later entry at this ancestor depth
+			end
+			if entries[j].level < depth then
+				return false -- left the ancestor's scope
+			end
+		end
+		return false
+	end
+
 	for i, entry in ipairs(entries) do
-		local indent = string.rep("  ", entry.level - 1)
-		table.insert(lines, indent .. entry.text)
+		if entry.level == 1 then
+			-- Root-level headers: no tree prefix
+			table.insert(lines, entry.text)
+		else
+			local prefix = ""
+			-- Build prefix for ancestor depths (2 .. entry.level - 1)
+			for d = 2, entry.level - 1 do
+				if ancestor_has_more(i, d) then
+					prefix = prefix .. vertical
+				else
+					prefix = prefix .. blank
+				end
+			end
+			-- Append branch connector at the entry's own depth
+			if is_last_sibling(i) then
+				prefix = prefix .. last_branch
+			else
+				prefix = prefix .. branch
+			end
+			table.insert(lines, prefix .. entry.text)
+		end
 		mapping[i] = entry.line
 	end
 
